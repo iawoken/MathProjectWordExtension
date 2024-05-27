@@ -22,13 +22,14 @@
     "signout": "office-addin-dev-settings m365-account logout",
     "start": "office-addin-debugging start manifest.xml",
     "start:desktop": "office-addin-debugging start manifest.xml desktop",
-    "start:web": "office-addin-debugging start manifest.xml web",
+    "start:web": "office-addin-debugging start manifest.xml web --document \"https://onedrive.live.com/edit.aspx?resid=16635E0568CE1482!s8fccda6cd87143178e7d1a0a76e4670b&migratedtospo=true&action=editnew&wdPreviousSession=e6c00943-a885-46a6-b64b-458a85632183&wdNewAndOpenCt=1716645362879&wdo=4&wdOrigin=wacFileNew&wdTpl=blankNew&wdLcid=1055&wdPreviousCorrelation=ee8fd6bf-e9f7-4d71-981c-cfaca888b2cb&wdaddindevserverport=3000&wdaddinmanifestfile=manifest.xml&wdaddinmanifestguid=05c2e1c9-3e1d-406e-9a91-e9ac64854143\"",
     "stop": "office-addin-debugging stop manifest.xml",
     "validate": "office-addin-manifest validate manifest.xml",
     "watch": "webpack --mode development --watch"
   },
   "dependencies": {
     "core-js": "^3.36.0",
+    "katex": "^0.16.10",
     "regenerator-runtime": "^0.14.1"
   },
   "devDependencies": {

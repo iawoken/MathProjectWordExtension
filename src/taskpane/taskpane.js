@@ -14,17 +14,29 @@ Office.onReady((info) => {
 });
 
 export async function run() {
-  return Word.run(async (context) => {
-    /**
-     * Insert your Word code here
-     */
+  $.ajax({
+    url: "https://stofy.dikholding.com/formulaAPI.php?id=1",
+    success: function(response) {
+      try {
+        const x = response
+        x.forEach(async (formula) => {
+          await insertFormulaIntoWord(`${formula.formula_title}: ${formula.formula}`);
+        });
+      } catch (e) {
+        console.error('JSON Parse Error:', e);
+      }
+    },
+    error: function(xhr, status, error) {
+      console.error(status, error);
+    }
+  });
+}
 
-    // insert a paragraph at the end of the document.
-    const paragraph = context.document.body.insertParagraph("Hello World", Word.InsertLocation.end);
-
-    // change the paragraph color to blue.
-    paragraph.font.color = "blue";
-
-    await context.sync();
+async function insertFormulaIntoWord(formula) {
+  await Word.run(async (context) => {
+      const body = context.document.body;
+      const xd = `<span id="main-input" id="src1" name="maininput" class="mathquill-input mathquill-editable" rel="tooltip" title>${formula}</span>`
+      body.insertHtml(xd, Word.InsertLocation.end);
+      await context.sync();
   });
 }

@@ -7,36 +7,50 @@
 
 Office.onReady((info) => {
   if (info.host === Office.HostType.Word) {
-    document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
-    document.getElementById("run").onclick = run;
+    document.getElementById("run").onclick = insertFormulaImages;
   }
 });
 
-export async function run() {
-  $.ajax({
-    url: "https://stofy.dikholding.com/formulaAPI.php?id=1",
-    success: function(response) {
-      try {
-        const x = response
-        x.forEach(async (formula) => {
-          await insertFormulaIntoWord(`${formula.formula_title}: ${formula.formula}`);
-        });
-      } catch (e) {
-        console.error('JSON Parse Error:', e);
-      }
-    },
-    error: function(xhr, status, error) {
-      console.error(status, error);
+export async function insertFormulaImages() {
+  try {
+    const response = await fetch("https://stofy.dikholding.com/formulaAPI.php?id=" + document.getElementById("userid").value);
+    if (response.status !== 200) {
+      document.getElementById("awokenmsg").innerHTML = "HATA: KULLANICI SISTEMDE KAYITLI DEGIL! <br><br>";
+      throw new Error(`KULLANICI SISTEMDE KAYITLI DEGIL!`);
     }
+
+    const formulas = await response.json();
+    for (const formula of formulas) {
+      const imagePath = await convertFormulaToImage(formula.formula);
+      await insertImageIntoWord(imagePath);
+    }
+  } catch (e) {
+    console.error('Error:', e);
+  }
+}
+
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
   });
 }
 
-async function insertFormulaIntoWord(formula) {
+async function convertFormulaToImage(formula) {
+  const response = await fetch("https://latex.codecogs.com/png.latex?" + encodeURIComponent(formula));
+  const imageBlob = await response.blob();
+  const base64Image = await blobToBase64(imageBlob);
+  return base64Image;
+}
+
+async function insertImageIntoWord(base64Image) {
   await Word.run(async (context) => {
-      const body = context.document.body;
-      const xd = `<span id="main-input" id="src1" name="maininput" class="mathquill-input mathquill-editable" rel="tooltip" title>${formula}</span>`
-      body.insertHtml(xd, Word.InsertLocation.end);
-      await context.sync();
+    const body = context.document.body;
+    const range = body.getRange();
+    range.insertInlinePictureFromBase64(base64Image, Word.InsertLocation.end);
+    await context.sync();
   });
 }
